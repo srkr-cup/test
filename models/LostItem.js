@@ -17,9 +17,17 @@ const lostItemSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    user: {
+ userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
+    },
+    userName: {
+      type: String,
+      required: true,
+    },
+    userContact: {
+      type: String,
       required: true,
     },
     status: {
