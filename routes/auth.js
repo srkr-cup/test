@@ -71,6 +71,11 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password, isAdmin } = req.body
 
+    // Check if required fields are provided
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" })
+    }
+
     // Check for user
     const user = await User.findOne({ email })
     if (!user) {
@@ -100,9 +105,10 @@ router.post("/login", async (req, res) => {
     }
 
     // Sign token
-    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" }, (err, token) => {
-      if (err) throw err
-      res.json({
+    try {
+      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" })
+
+      return res.json({
         token,
         user: {
           id: user._id,
@@ -111,7 +117,10 @@ router.post("/login", async (req, res) => {
           role: user.role,
         },
       })
-    })
+    } catch (tokenError) {
+      console.error("Token generation error:", tokenError)
+      return res.status(500).json({ message: "Error generating authentication token" })
+    }
   } catch (error) {
     console.error("Login error:", error)
     res.status(500).json({ message: "Server error" })
@@ -307,3 +316,7 @@ router.post("/reset-password", async (req, res) => {
 })
 
 module.exports = router
+module.exports = {
+  router,
+  sendPasswordResetEmail,
+}
