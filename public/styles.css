@@ -3470,3 +3470,31 @@ button:focus,
     opacity: 1;
   }
 }
+
+/* Demo OTP Display Styles */
+.demo-otp-container {
+  margin: 15px 0;
+  padding: 10px;
+  background-color: #f0f8ff;
+  border: 2px dashed #4a90e2;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.demo-otp-notice {
+  font-weight: bold;
+  color: #4a90e2;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.demo-otp-code {
+  font-size: 16px;
+  margin: 0;
+}
+
+.demo-otp-code strong {
+  font-size: 20px;
+  color: #e74c3c;
+  letter-spacing: 2px;
+}
