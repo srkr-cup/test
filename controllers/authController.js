@@ -40,6 +40,15 @@ exports.signup = async (req, res) => {
       })
     }
 
+    // If in demo mode, return the OTP to display in the UI
+    if (emailResult.demo) {
+      return res.status(201).json({
+        message: "OTP sent to your email. Please verify to complete registration.",
+        email: email,
+        otp: emailResult.otp
+      })
+    }
+
     res.status(201).json({
       message: "OTP sent to your email. Please verify to complete registration.",
       email: email,
@@ -151,9 +160,14 @@ exports.resendOTP = async (req, res) => {
     await user.save()
 
     // Send OTP email
-    const emailSent = await sendOTPEmail(email, otp)
-    if (!emailSent) {
+    const emailResult = await sendOTPEmail(email, otp)
+    if (!emailResult) {
       return res.status(500).json({ message: "Failed to send OTP email" })
+    }
+
+    // If in demo mode, return the OTP to display in the UI
+    if (emailResult.demo) {
+      return res.status(200).json({ message: "New OTP sent to your email", otp: emailResult.otp })
     }
 
     res.status(200).json({ message: "New OTP sent to your email" })
