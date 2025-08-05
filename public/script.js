@@ -1,32 +1,31 @@
 // Global variables
 let currentUser = null
 let isAdmin = false
-const API_BASE_URL = window.location.origin + "/api"
 const notifications = []
 
 // Initialize OTP input fields
 function initializeOTPInputs() {
-  const otpInputs = document.querySelectorAll(".otp-input")
-
+  const otpInputs = document.querySelectorAll('.otp-input')
+  
   otpInputs.forEach((input, index) => {
-    input.addEventListener("input", (e) => {
+    input.addEventListener('input', (e) => {
       const value = e.target.value
-
+      
       // Allow only numbers
       if (!/^\d*$/.test(value)) {
-        input.value = ""
+        input.value = ''
         return
       }
-
+      
       // Auto-move to next input
       if (value && index < otpInputs.length - 1) {
         otpInputs[index + 1].focus()
       }
     })
-
+    
     // Handle backspace
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Backspace" && !input.value && index > 0) {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !input.value && index > 0) {
         otpInputs[index - 1].focus()
       }
     })
@@ -35,32 +34,32 @@ function initializeOTPInputs() {
 
 // Initialize the application
 function setupDashboardSidebar() {
-  const sidebarToggle = document.getElementById("sidebar-toggle")
-  const dashboardSidebar = document.getElementById("dashboard-sidebar")
-
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const dashboardSidebar = document.getElementById('dashboard-sidebar');
+  
   if (sidebarToggle && dashboardSidebar) {
-    sidebarToggle.addEventListener("click", () => {
-      dashboardSidebar.classList.toggle("active")
-    })
+    sidebarToggle.addEventListener('click', () => {
+      dashboardSidebar.classList.toggle('active');
+    });
 
     // Close sidebar when clicking outside on mobile
-    document.addEventListener("click", (e) => {
+    document.addEventListener('click', (e) => {
       if (window.innerWidth <= 768) {
         if (!dashboardSidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
-          dashboardSidebar.classList.remove("active")
+          dashboardSidebar.classList.remove('active');
         }
       }
-    })
+    });
 
     // Close sidebar when clicking nav items on mobile
-    const navItems = dashboardSidebar.querySelectorAll(".nav-item")
-    navItems.forEach((item) => {
-      item.addEventListener("click", () => {
+    const navItems = dashboardSidebar.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
         if (window.innerWidth <= 768) {
-          dashboardSidebar.classList.remove("active")
+          dashboardSidebar.classList.remove('active');
         }
-      })
-    })
+      });
+    });
   }
 }
 
@@ -70,19 +69,118 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeOTPInputs()
   setupMobileMenu()
   setupDashboardSidebar()
+  
+  if (hamburger && navMenu) {
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active')
+      navMenu.classList.toggle('active')
+    })
+    
+    // Close mobile menu when clicking on a nav link
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active')
+        navMenu.classList.remove('active')
+      })
+    })
+  }
 })
 
 function initializeApp() {
   console.log("Initializing app...")
 
+  // Setup mobile menu functionality
+function setupMobileMenu() {
+  const hamburger = document.getElementById('hamburger')
+  const navMenu = document.getElementById('nav-menu')
+  const navLinks = document.querySelectorAll('.nav-link')
+
+  if (hamburger && navMenu) {
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active')
+      navMenu.classList.toggle('active')
+    })
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!hamburger.contains(e.target) && !navMenu.contains(e.target)) {
+        hamburger.classList.remove('active')
+        navMenu.classList.remove('active')
+      }
+    })
+
+    // Close menu when clicking nav links
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active')
+        navMenu.classList.remove('active')
+      })
+    })
+  }
+}
+
+// Initialize sample users if not exists
+  if (!localStorage.getItem("users")) {
+    console.log("Creating sample users...")
+    const sampleUsers = [
+      {
+        id: 1,
+        name: "John Doe",
+        regdNo: "22B91A24",
+        email: "john@example.com",
+        phone: "1234567890",
+        password: "password123",
+        joinDate: new Date().toISOString(),
+      },
+      {
+        id: 2,
+        name: "Jane Smith",
+        regdNo: "24B91A2S2",
+        email: "jane@example.com",
+        phone: "0987654321",
+        password: "password123",
+        joinDate: new Date().toISOString(),
+      },
+    ]
+    localStorage.setItem("users", JSON.stringify(sampleUsers))
+    console.log("Sample users created:", sampleUsers)
+  }
+
+  // Initialize admin user
+  if (!localStorage.getItem("admin")) {
+    console.log("Creating admin user...")
+    const admin = {
+      email: "srkrcup@gmail.com",
+      password: "Srkrcup@25",
+    }
+    localStorage.setItem("admin", JSON.stringify(admin))
+    console.log("Admin user created:", admin)
+  }
+
+  // Initialize empty arrays for data
+  if (!localStorage.getItem("lostItems")) {
+    localStorage.setItem("lostItems", JSON.stringify([]))
+  }
+  if (!localStorage.getItem("marketplaceItems")) {
+    localStorage.setItem("marketplaceItems", JSON.stringify([]))
+  }
+  if (!localStorage.getItem("notes")) {
+    localStorage.setItem("notes", JSON.stringify([]))
+  }
+  if (!localStorage.getItem("notifications")) {
+    localStorage.setItem("notifications", JSON.stringify([]))
+  }
+
+  // Initialize sample data
+  initializeSampleData()
+
   // Check if user is logged in
   const savedUser = localStorage.getItem("currentUser")
   const savedIsAdmin = localStorage.getItem("isAdmin")
-  const token = localStorage.getItem("token")
 
-  console.log("Checking saved login:", { savedUser, savedIsAdmin, token })
+  console.log("Checking saved login:", { savedUser, savedIsAdmin })
 
-  if (savedUser && token) {
+  if (savedUser) {
     currentUser = JSON.parse(savedUser)
     isAdmin = savedIsAdmin === "true"
     console.log("User already logged in:", { currentUser, isAdmin })
@@ -95,58 +193,36 @@ function initializeApp() {
 
 function setupEventListeners() {
   // Navigation
-  const hamburger = document.getElementById("hamburger")
-  if (hamburger) {
-    hamburger.addEventListener("click", toggleMobileMenu)
-  }
+  document.getElementById("hamburger").addEventListener("click", toggleMobileMenu)
 
-  // Forms
-  const loginForm = document.getElementById("loginForm")
-  if (loginForm) {
-    loginForm.addEventListener("submit", handleLogin)
-  }
+  // Add event listeners to login buttons
+  const loginButtons = document.querySelectorAll('button[onclick="showLogin()"]')
+  console.log("Found login buttons:", loginButtons.length)
+  loginButtons.forEach((button, index) => {
+    console.log(`Adding click event to login button ${index}`)
+    button.addEventListener("click", (e) => {
+      console.log(`Login button ${index} clicked`, e)
+      // The onclick attribute will handle the actual showLogin call
+    })
+  })
 
-  const signupForm = document.getElementById("signupForm")
-  if (signupForm) {
-    signupForm.addEventListener("submit", handleSignup)
-  }
-
+  // Forgot Password Form
   const forgotPasswordForm = document.getElementById("forgotPasswordForm")
   if (forgotPasswordForm) {
     forgotPasswordForm.addEventListener("submit", handleForgotPassword)
   }
 
+  // Password Reset Form
   const passwordResetForm = document.getElementById("passwordResetForm")
   if (passwordResetForm) {
     passwordResetForm.addEventListener("submit", handlePasswordReset)
   }
 
-  const postLostItemForm = document.getElementById("postLostItemForm")
-  if (postLostItemForm) {
-    postLostItemForm.addEventListener("submit", handlePostLostItem)
+  // Resend Reset OTP Link
+  const resendResetOtpLink = document.getElementById("resendResetOtpLink")
+  if (resendResetOtpLink) {
+    resendResetOtpLink.addEventListener("click", handleResendResetOTP)
   }
-
-  const postSaleItemForm = document.getElementById("postSaleItemForm")
-  if (postSaleItemForm) {
-    postSaleItemForm.addEventListener("submit", handlePostSaleItem)
-  }
-
-  const uploadNotesForm = document.getElementById("uploadNotesForm")
-  if (uploadNotesForm) {
-    uploadNotesForm.addEventListener("submit", handleUploadNotes)
-  }
-
-  // Set up OTP verification form listeners
-  setupOTPVerificationListeners()
-
-  // Contact form
-  const contactForm = document.getElementById("contactForm")
-  if (contactForm) {
-    contactForm.addEventListener("submit", handleContactForm)
-  }
-
-  // FAQ toggle functionality
-  setupFAQToggles()
 
   // Dashboard sidebar toggles for mobile
   const sidebarToggle = document.getElementById("sidebar-toggle")
@@ -162,12 +238,28 @@ function setupEventListeners() {
   const adminSidebarToggle = document.getElementById("admin-sidebar-toggle")
   if (adminSidebarToggle) {
     adminSidebarToggle.addEventListener("click", () => {
-      const sidebar = document.getElementById("admin-sidebar")
-      if (sidebar) {
-        sidebar.classList.toggle("active")
-      }
+      document.getElementById("admin-sidebar").classList.toggle("active")
     })
   }
+
+  // Forms
+  document.getElementById("loginForm").addEventListener("submit", handleLogin)
+  document.getElementById("signupForm").addEventListener("submit", handleSignup)
+  document.getElementById("postLostItemForm").addEventListener("submit", handlePostLostItem)
+  document.getElementById("postSaleItemForm").addEventListener("submit", handlePostSaleItem)
+  document.getElementById("uploadNotesForm").addEventListener("submit", handleUploadNotes)
+
+  // Set up OTP verification form listeners
+  setupOTPVerificationListeners()
+
+  // Contact form
+  const contactForm = document.getElementById("contactForm")
+  if (contactForm) {
+    contactForm.addEventListener("submit", handleContactForm)
+  }
+
+  // FAQ toggle functionality
+  setupFAQToggles()
 
   // Close modals when clicking outside
   window.addEventListener("click", (event) => {
@@ -175,35 +267,6 @@ function setupEventListeners() {
       event.target.style.display = "none"
     }
   })
-}
-
-function setupMobileMenu() {
-  const hamburger = document.getElementById("hamburger")
-  const navMenu = document.getElementById("nav-menu")
-  const navLinks = document.querySelectorAll(".nav-link")
-
-  if (hamburger && navMenu) {
-    hamburger.addEventListener("click", () => {
-      hamburger.classList.toggle("active")
-      navMenu.classList.toggle("active")
-    })
-
-    // Close menu when clicking outside
-    document.addEventListener("click", (e) => {
-      if (!hamburger.contains(e.target) && !navMenu.contains(e.target)) {
-        hamburger.classList.remove("active")
-        navMenu.classList.remove("active")
-      }
-    })
-
-    // Close menu when clicking nav links
-    navLinks.forEach((link) => {
-      link.addEventListener("click", () => {
-        hamburger.classList.remove("active")
-        navMenu.classList.remove("active")
-      })
-    })
-  }
 }
 
 function setupFAQToggles() {
@@ -245,9 +308,7 @@ function handleContactForm(e) {
 // Navigation functions
 function toggleMobileMenu() {
   const navMenu = document.getElementById("nav-menu")
-  if (navMenu) {
-    navMenu.classList.toggle("active")
-  }
+  navMenu.classList.toggle("active")
 }
 
 function showLogin() {
@@ -263,32 +324,20 @@ function showLogin() {
 }
 
 function showSignup() {
-  const signupModal = document.getElementById("signupModal")
-  if (signupModal) {
-    signupModal.style.display = "block"
-  }
+  document.getElementById("signupModal").style.display = "block"
   closeModal("loginModal")
   closeModal("forgotPasswordModal")
   closeModal("passwordResetModal")
 }
 
 function showForgotPassword() {
-  const forgotModal = document.getElementById("forgotPasswordModal")
-  if (forgotModal) {
-    forgotModal.style.display = "block"
-  }
+  document.getElementById("forgotPasswordModal").style.display = "block"
   closeModal("loginModal")
 }
 
 function showPasswordReset(email) {
-  const resetModal = document.getElementById("passwordResetModal")
-  if (resetModal) {
-    resetModal.style.display = "block"
-    const emailField = document.getElementById("resetEmail")
-    if (emailField) {
-      emailField.value = email
-    }
-  }
+  document.getElementById("passwordResetModal").style.display = "block"
+  document.getElementById("resetEmail").value = email
   closeModal("forgotPasswordModal")
 }
 
@@ -347,45 +396,80 @@ async function handleLogin(e) {
   loginButton.querySelector("span").textContent = "Signing In..."
 
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        password,
-        isAdmin: adminLogin,
-      }),
-    })
+    if (adminLogin) {
+      // Admin login - use localStorage for demo purposes
+      const admin = JSON.parse(localStorage.getItem("admin"))
+      console.log("Admin credentials:", admin)
+      if (email == "srkrcup@gmail.com" && password == "Srkrcup@25") {
+        isAdmin = true
+        currentUser = { name: "Admin", email: admin.email }
+        localStorage.setItem("currentUser", JSON.stringify(currentUser))
+        localStorage.setItem("isAdmin", "true")
+        console.log("Admin login successful, showing dashboard")
+        try {
+          // Store admin notification locally
+          const notifications = JSON.parse(localStorage.getItem("notifications") || "[]")
+          notifications.push({
+            id: Date.now(),
+            message: "Admin logged in",
+            type: "system",
+            timestamp: new Date().toISOString(),
+            read: false,
+          })
+          localStorage.setItem("notifications", JSON.stringify(notifications))
 
-    const data = await response.json()
-
-    if (!response.ok) {
-      if (data.message === "Email not verified") {
-        alert("Your email is not verified. Please check your inbox for the verification OTP.")
-        // Show OTP verification modal with the email
-        showOTPVerificationModal(email)
+          showDashboard()
+          closeModal("loginModal")
+          updateNotificationBadge()
+        } catch (error) {
+          console.error("Error showing dashboard:", error)
+          alert("Error loading dashboard. Please try again.")
+        }
       } else {
-        throw new Error(data.message || "Login failed")
+        alert("Invalid admin credentials. Please contact system administrator.")
       }
-      return
-    }
+    } else {
+      // User login - use API
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      })
 
-    // Login successful
-    isAdmin = data.user.role === "admin"
-    currentUser = data.user
-    localStorage.setItem("currentUser", JSON.stringify(currentUser))
-    localStorage.setItem("isAdmin", isAdmin ? "true" : "false")
-    localStorage.setItem("token", data.token)
+      const data = await response.json()
 
-    console.log("User login successful, showing dashboard")
-    try {
-      showDashboard()
-      closeModal("loginModal")
-    } catch (error) {
-      console.error("Error showing dashboard:", error)
-      alert("Error loading dashboard. Please try again.")
+      if (!response.ok) {
+        if (data.message === "Email not verified") {
+          alert("Your email is not verified. Please check your inbox for the verification OTP.")
+          // Show OTP verification modal with the email
+          showOTPVerificationModal(email)
+        } else {
+          throw new Error(data.message || "Login failed")
+        }
+        return
+      }
+
+      // Login successful
+      isAdmin = data.user.role === "admin"
+      currentUser = data.user
+      localStorage.setItem("currentUser", JSON.stringify(currentUser))
+      localStorage.setItem("isAdmin", isAdmin ? "true" : "false")
+      localStorage.setItem("token", data.token)
+
+      console.log("User login successful, showing dashboard")
+      try {
+        showDashboard()
+        closeModal("loginModal")
+        addNotification(`${currentUser.name} logged in`, "system")
+      } catch (error) {
+        console.error("Error showing dashboard:", error)
+        alert("Error loading dashboard. Please try again.")
+      }
     }
   } catch (error) {
     alert(error.message || "Login failed. Please try again.")
@@ -412,6 +496,15 @@ async function handleSignup(e) {
     return
   }
 
+  // Validate password strength
+  const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+  if (!passwordPattern.test(password)) {
+    alert(
+      "Password must contain at least 8 characters with one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)",
+    )
+    return
+  }
+
   // Add loading state to the button
   const signupButton = e.submitter
   const originalText = signupButton.querySelector("span").textContent
@@ -420,7 +513,7 @@ async function handleSignup(e) {
 
   try {
     // Send signup request to the server
-    const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+    const response = await fetch("/api/auth/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -457,6 +550,9 @@ async function handleSignup(e) {
 
 function logout() {
   try {
+    if (currentUser) {
+      addNotification(`${currentUser.name} logged out`, "system")
+    }
     currentUser = null
     isAdmin = false
     localStorage.removeItem("currentUser")
@@ -580,14 +676,14 @@ function setupOTPInputFields() {
     let value = input.value
 
     // Remove non-digits
-    value = value.replace(/\D/g, "")
+    value = value.replace(/\D/g, '')
 
     // Take only first 6 digits
     value = value.substring(0, 6)
 
     // Update display
     otpInputs.forEach((input, index) => {
-      input.value = value[index] || ""
+      input.value = value[index] || ''
     })
 
     // Update hidden field
@@ -595,18 +691,18 @@ function setupOTPInputFields() {
 
     // Focus next empty input if available
     if (value.length < 6) {
-      const nextEmptyInput = Array.from(otpInputs).find((input) => !input.value)
+      const nextEmptyInput = Array.from(otpInputs).find(input => !input.value)
       if (nextEmptyInput) nextEmptyInput.focus()
     }
   }
 
   function handleKeyDown(e) {
-    if (e.key === "Backspace") {
+    if (e.key === 'Backspace') {
       const input = e.target
-      if (input.value === "") {
+      if (input.value === '') {
         // Clear all inputs when backspacing an empty first input
-        otpInputs.forEach((input) => (input.value = ""))
-        otpCodeField.value = ""
+        otpInputs.forEach(input => input.value = '')
+        otpCodeField.value = ''
         firstInput.focus()
       }
     }
@@ -614,17 +710,17 @@ function setupOTPInputFields() {
 
   function handlePaste(e) {
     e.preventDefault()
-    const pastedData = e.clipboardData.getData("text")
-    const value = pastedData.replace(/\D/g, "").substring(0, 6)
-
+    const pastedData = e.clipboardData.getData('text')
+    const value = pastedData.replace(/\D/g, '').substring(0, 6)
+    
     // Update display
     otpInputs.forEach((input, index) => {
-      input.value = value[index] || ""
+      input.value = value[index] || ''
     })
 
     // Update hidden field
     otpCodeField.value = value
-
+    
     // Focus last filled input
     const lastFilledIndex = Math.min(value.length, otpInputs.length) - 1
     if (lastFilledIndex >= 0) otpInputs[lastFilledIndex].focus()
@@ -645,6 +741,17 @@ function setupOTPInputFields() {
   firstInput.focus()
 }
 
+  // Function to update the hidden OTP field with combined values
+  function updateOTPValue() {
+    let otpValue = ""
+    otpInputs.forEach((input) => {
+      otpValue += input.value || "" // Handle empty inputs
+    })
+    otpCodeField.value = otpValue
+    console.log("Combined OTP:", otpCodeField.value) // Debug log
+  }
+
+
 // Start countdown timer for OTP expiration
 function startOTPCountdownTimer() {
   // Clear any existing timer
@@ -655,7 +762,7 @@ function startOTPCountdownTimer() {
   const timerElement = document.getElementById("otpTimer")
   const resendLink = document.getElementById("resendOtpLink")
   const form = document.getElementById("otpVerificationForm")
-  const inputs = document.querySelectorAll(".otp-input")
+  const inputs = document.querySelectorAll('.otp-input')
   let timeLeft = 5 * 60 // 5 minutes in seconds
   let warningShown = false
   let criticalShown = false
@@ -667,11 +774,11 @@ function startOTPCountdownTimer() {
   resendLink.classList.remove("active")
   resendLink.style.pointerEvents = "none"
   resendLink.style.opacity = "0.5"
-  inputs.forEach((input) => (input.disabled = false))
-
+  inputs.forEach(input => input.disabled = false)
+  
   // Reset timer classes and state
   timerElement.classList.remove("timer-warning", "timer-critical", "timer-expired", "pulse-animation")
-
+  
   // Function to update timer display
   function updateTimerDisplay() {
     const minutes = Math.floor(timeLeft / 60)
@@ -691,6 +798,7 @@ function startOTPCountdownTimer() {
     if (timeLeft <= 60 && !warningShown) {
       warningShown = true
       timerElement.classList.add("timer-warning", "pulse-animation")
+      // Optional: Show warning toast/message
     }
 
     // Critical state - 30 seconds remaining
@@ -698,13 +806,14 @@ function startOTPCountdownTimer() {
       criticalShown = true
       timerElement.classList.add("timer-critical")
       timerElement.classList.add("pulse-animation-fast")
+      // Optional: Show critical toast/message
     }
 
     // Expired state
     if (timeLeft <= 0) {
       clearInterval(window.otpTimerInterval)
       window.otpTimerInterval = null
-
+      
       timerElement.textContent = "Code Expired!"
       timerElement.classList.remove("timer-warning", "timer-critical", "pulse-animation", "pulse-animation-fast")
       timerElement.classList.add("timer-expired")
@@ -721,8 +830,8 @@ function startOTPCountdownTimer() {
       resendLink.style.opacity = "1"
 
       // Clear form fields
-      document.querySelectorAll(".otp-input").forEach((input) => {
-        input.value = ""
+      document.querySelectorAll('.otp-input').forEach(input => {
+        input.value = ''
         input.disabled = true
       })
     }
@@ -735,20 +844,18 @@ async function handleOTPVerification(e) {
   e.preventDefault()
 
   const email = document.getElementById("otpEmail").value
-  const otpInputs = document.querySelectorAll(".otp-input")
-  const otp = Array.from(otpInputs)
-    .map((input) => input.value)
-    .join("")
+  const otpInputs = document.querySelectorAll('.otp-input')
+  const otp = Array.from(otpInputs).map(input => input.value).join('')
   const otpForm = document.getElementById("otpVerificationForm")
   const timerElement = document.getElementById("otpTimer")
 
   // Check if OTP is expired
-  if (timerElement.classList.contains("timer-expired")) {
+  if (timerElement.classList.contains('timer-expired')) {
     const errorMessage = document.createElement("div")
     errorMessage.className = "verification-error"
     errorMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> OTP has expired. Please request a new one.'
     otpForm.insertBefore(errorMessage, otpForm.querySelector(".form-group:last-child"))
-
+    
     setTimeout(() => {
       if (errorMessage.parentNode) {
         errorMessage.parentNode.removeChild(errorMessage)
@@ -769,7 +876,7 @@ async function handleOTPVerification(e) {
       '<i class="fas fa-exclamation-circle"></i> Please enter the complete 6-digit verification code'
 
     // Remove any existing error messages
-    const existingError = otpForm.querySelector(".verification-error, .verification-success")
+    const existingError = otpForm.querySelector(".verification-error")
     if (existingError) {
       existingError.remove()
     }
@@ -796,7 +903,7 @@ async function handleOTPVerification(e) {
 
   try {
     // Send OTP verification request to the server
-    const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+    const response = await fetch("/api/auth/verify-otp", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -844,6 +951,7 @@ async function handleOTPVerification(e) {
         // Close the modal and show dashboard
         closeModal("otpVerificationModal")
         showDashboard()
+        addNotification(`${currentUser.name} verified and logged in`, "system")
       }, 1500)
     } else {
       // Fallback to the old behavior
@@ -910,8 +1018,8 @@ async function handleResendOTP(e) {
   }
 
   // Re-enable OTP input fields
-  document.querySelectorAll(".otp-input").forEach((input) => {
-    input.value = ""
+  document.querySelectorAll('.otp-input').forEach(input => {
+    input.value = ''
     input.disabled = false
   })
 
@@ -921,7 +1029,7 @@ async function handleResendOTP(e) {
 
   try {
     // Send resend OTP request to the server
-    const response = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
+    const response = await fetch("/api/auth/resend-otp", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -942,8 +1050,8 @@ async function handleResendOTP(e) {
     form.appendChild(successMessage)
 
     // Clear and focus first input
-    document.querySelectorAll(".otp-input").forEach((input, index) => {
-      input.value = ""
+    document.querySelectorAll('.otp-input').forEach((input, index) => {
+      input.value = ''
       if (index === 0) input.focus()
     })
 
@@ -998,7 +1106,7 @@ async function handleForgotPassword(e) {
 
   try {
     // Send forgot password request to the server
-    const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+    const response = await fetch("/api/auth/forgot-password", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1049,7 +1157,7 @@ async function handlePasswordReset(e) {
 
   try {
     // Send reset password request to the server
-    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+    const response = await fetch("/api/auth/reset-password", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1076,6 +1184,48 @@ async function handlePasswordReset(e) {
     // Remove loading state
     resetButton.disabled = false
     resetButton.querySelector("span").textContent = originalText
+  }
+}
+
+async function handleResendResetOTP(e) {
+  e.preventDefault()
+
+  const email = document.getElementById("resetEmail").value
+
+  if (!email) {
+    alert("Email address is missing. Please try again.")
+    return
+  }
+
+  // Add loading state to the resend link
+  const resendLink = document.getElementById("resendResetOtpLink")
+  const originalText = resendLink.textContent
+  resendLink.textContent = "Sending..."
+  resendLink.style.pointerEvents = "none"
+
+  try {
+    // Send forgot password request again to resend OTP
+    const response = await fetch("/api/auth/forgot-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to resend reset code")
+    }
+
+    alert("A new password reset code has been sent to your email.")
+  } catch (error) {
+    alert(error.message)
+  } finally {
+    // Reset the link
+    resendLink.textContent = originalText
+    resendLink.style.pointerEvents = "auto"
   }
 }
 
@@ -1227,303 +1377,283 @@ function showTab(tabName, userType, event) {
 // User Dashboard functions
 function loadUserDashboard() {
   updateUserStats()
+
   loadLostFoundItems()
   loadMarketplaceItems()
   loadNotes()
   loadRecentNotifications()
 }
 
-async function updateUserStats() {
-  try {
-    const token = localStorage.getItem("token")
-    if (!token) return
+function updateUserStats() {
+  const lostItems = JSON.parse(localStorage.getItem("lostItems"))
+  const marketplaceItems = JSON.parse(localStorage.getItem("marketplaceItems"))
+  const notes = JSON.parse(localStorage.getItem("notes"))
 
-    // Fetch user's lost items
-    const lostResponse = await fetch(`${API_BASE_URL}/lostfound/user`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    const lostItems = await lostResponse.json()
+  const userLostItems = lostItems.filter((item) => item.userId === currentUser.id)
+  const userSaleItems = marketplaceItems.filter((item) => item.userId === currentUser.id)
+  const userNotes = notes.filter((note) => note.userId === currentUser.id)
 
-    // Fetch user's marketplace items
-    const marketResponse = await fetch(`${API_BASE_URL}/marketplace/user`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    const marketItems = await marketResponse.json()
-
-    // Fetch user's notes
-    const notesResponse = await fetch(`${API_BASE_URL}/notes/user`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    const notes = await notesResponse.json()
-
-    // Update stats
-    const userLostItemsEl = document.getElementById("userLostItems")
-    const userSaleItemsEl = document.getElementById("userSaleItems")
-    const userNotesEl = document.getElementById("userNotes")
-
-    if (userLostItemsEl) userLostItemsEl.textContent = lostItems.length || 0
-    if (userSaleItemsEl) userSaleItemsEl.textContent = marketItems.length || 0
-    if (userNotesEl) userNotesEl.textContent = notes.length || 0
-  } catch (error) {
-    console.error("Error updating user stats:", error)
-  }
+  document.getElementById("userLostItems").textContent = userLostItems.length
+  document.getElementById("userSaleItems").textContent = userSaleItems.length
+  document.getElementById("userNotes").textContent = userNotes.length
 }
 
 // Lost & Found functions
 function showPostLostItem() {
-  const modal = document.getElementById("postLostItemModal")
-  if (modal) {
-    modal.style.display = "block"
-  }
+  document.getElementById("postLostItemModal").style.display = "block"
 }
 
-async function handlePostLostItem(e) {
+function handlePostLostItem(e) {
   e.preventDefault()
 
   const title = document.getElementById("lostItemTitle").value
   const description = document.getElementById("lostItemDescription").value
   const location = document.getElementById("lostItemLocation").value
+  const imageFile = document.getElementById("lostItemImage").files[0]
 
-  const token = localStorage.getItem("token")
-  if (!token) {
-    alert("Please login first")
+  const lostItems = JSON.parse(localStorage.getItem("lostItems"))
+
+  const newItem = {
+    id: Date.now(),
+    title,
+    description,
+    location,
+    userId: currentUser.id,
+    userName: currentUser.name,
+    userContact: currentUser.phone,
+    status: "pending",
+    datePosted: new Date().toISOString(),
+    image: imageFile ? URL.createObjectURL(imageFile) : null,
+  }
+
+  lostItems.push(newItem)
+  localStorage.setItem("lostItems", JSON.stringify(lostItems))
+
+  // Add notification for admin
+  addNotification(`New lost item reported: ${title}`, "lost-found", newItem.id)
+
+  alert("Item posted successfully! Waiting for admin approval.")
+  closeModal("postLostItemModal")
+  document.getElementById("postLostItemForm").reset()
+  updateUserStats()
+  loadLostFoundItems()
+}
+
+function loadLostFoundItems() {
+  const lostItems = JSON.parse(localStorage.getItem("lostItems"))
+  const approvedItems = lostItems.filter((item) => item.status === "approved")
+
+  const container = document.getElementById("lostItemsList")
+  container.innerHTML = ""
+
+  if (approvedItems.length === 0) {
+    container.innerHTML = '<p class="text-center">No lost items found.</p>'
     return
   }
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/lostfound`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        title,
-        description,
-        location,
-      }),
-    })
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to post item")
-    }
-
-    alert("Item posted successfully! Waiting for admin approval.")
-    closeModal("postLostItemModal")
-    document.getElementById("postLostItemForm").reset()
-    updateUserStats()
-    loadLostFoundItems()
-  } catch (error) {
-    alert(error.message)
-  }
-}
-
-async function loadLostFoundItems() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/lostfound`)
-    const items = await response.json()
-
-    const container = document.getElementById("lostItemsList")
-    if (!container) return
-
-    container.innerHTML = ""
-
-    if (items.length === 0) {
-      container.innerHTML = '<p class="text-center">No lost items found.</p>'
-      return
-    }
-
-    items.forEach((item) => {
-      const itemCard = createItemCard(item, "lost")
-      container.appendChild(itemCard)
-    })
-  } catch (error) {
-    console.error("Error loading lost items:", error)
-  }
+  approvedItems.forEach((item) => {
+    const itemCard = createItemCard(item, "lost")
+    container.appendChild(itemCard)
+  })
 }
 
 function searchLostItems() {
   const searchTerm = document.getElementById("lostItemSearch").value.toLowerCase()
-  // Implementation for search functionality
-  loadLostFoundItems() // For now, just reload all items
+  const lostItems = JSON.parse(localStorage.getItem("lostItems"))
+  const filteredItems = lostItems.filter(
+    (item) =>
+      item.status === "approved" &&
+      (item.title.toLowerCase().includes(searchTerm) ||
+        item.description.toLowerCase().includes(searchTerm) ||
+        item.location.toLowerCase().includes(searchTerm)),
+  )
+
+  const container = document.getElementById("lostItemsList")
+  container.innerHTML = ""
+
+  if (filteredItems.length === 0) {
+    container.innerHTML = '<p class="text-center">No items found matching your search.</p>'
+    return
+  }
+
+  filteredItems.forEach((item) => {
+    const itemCard = createItemCard(item, "lost")
+    container.appendChild(itemCard)
+  })
 }
 
 // Marketplace functions
 function showPostSaleItem() {
-  const modal = document.getElementById("postSaleItemModal")
-  if (modal) {
-    modal.style.display = "block"
-  }
+  document.getElementById("postSaleItemModal").style.display = "block"
 }
 
-async function handlePostSaleItem(e) {
+function handlePostSaleItem(e) {
   e.preventDefault()
 
   const title = document.getElementById("saleItemTitle").value
   const description = document.getElementById("saleItemDescription").value
   const price = document.getElementById("saleItemPrice").value
   const contact = document.getElementById("saleItemContact").value
+  const imageFile = document.getElementById("saleItemImage").files[0]
 
-  const token = localStorage.getItem("token")
-  if (!token) {
-    alert("Please login first")
+  const marketplaceItems = JSON.parse(localStorage.getItem("marketplaceItems"))
+
+  const newItem = {
+    id: Date.now(),
+    title,
+    description,
+    price: Number.parseFloat(price),
+    contact,
+    userId: currentUser.id,
+    userName: currentUser.name,
+    datePosted: new Date().toISOString(),
+    image: imageFile ? URL.createObjectURL(imageFile) : null,
+  }
+
+  marketplaceItems.push(newItem)
+  localStorage.setItem("marketplaceItems", JSON.stringify(marketplaceItems))
+
+  alert("Item posted successfully!")
+  closeModal("postSaleItemModal")
+  document.getElementById("postSaleItemForm").reset()
+  updateUserStats()
+  loadMarketplaceItems()
+}
+
+function loadMarketplaceItems() {
+  const marketplaceItems = JSON.parse(localStorage.getItem("marketplaceItems"))
+
+  const container = document.getElementById("marketplaceList")
+  container.innerHTML = ""
+
+  if (marketplaceItems.length === 0) {
+    container.innerHTML = '<p class="text-center">No items for sale.</p>'
     return
   }
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/marketplace`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        title,
-        description,
-        price: Number.parseFloat(price),
-        contact,
-      }),
-    })
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to post item")
-    }
-
-    alert("Item posted successfully!")
-    closeModal("postSaleItemModal")
-    document.getElementById("postSaleItemForm").reset()
-    updateUserStats()
-    loadMarketplaceItems()
-  } catch (error) {
-    alert(error.message)
-  }
-}
-
-async function loadMarketplaceItems() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/marketplace`)
-    const items = await response.json()
-
-    const container = document.getElementById("marketplaceList")
-    if (!container) return
-
-    container.innerHTML = ""
-
-    if (items.length === 0) {
-      container.innerHTML = '<p class="text-center">No items for sale.</p>'
-      return
-    }
-
-    items.forEach((item) => {
-      const itemCard = createItemCard(item, "marketplace")
-      container.appendChild(itemCard)
-    })
-  } catch (error) {
-    console.error("Error loading marketplace items:", error)
-  }
+  marketplaceItems.forEach((item) => {
+    const itemCard = createItemCard(item, "marketplace")
+    container.appendChild(itemCard)
+  })
 }
 
 function searchMarketplace() {
   const searchTerm = document.getElementById("marketplaceSearch").value.toLowerCase()
-  // Implementation for search functionality
-  loadMarketplaceItems() // For now, just reload all items
+  const marketplaceItems = JSON.parse(localStorage.getItem("marketplaceItems"))
+  const filteredItems = marketplaceItems.filter(
+    (item) => item.title.toLowerCase().includes(searchTerm) || item.description.toLowerCase().includes(searchTerm),
+  )
+
+  const container = document.getElementById("marketplaceList")
+  container.innerHTML = ""
+
+  if (filteredItems.length === 0) {
+    container.innerHTML = '<p class="text-center">No items found matching your search.</p>'
+    return
+  }
+
+  filteredItems.forEach((item) => {
+    const itemCard = createItemCard(item, "marketplace")
+    container.appendChild(itemCard)
+  })
 }
 
 // Notes functions
 function showUploadNotes() {
-  const modal = document.getElementById("uploadNotesModal")
-  if (modal) {
-    modal.style.display = "block"
-  }
+  document.getElementById("uploadNotesModal").style.display = "block"
 }
 
-async function handleUploadNotes(e) {
+function handleUploadNotes(e) {
   e.preventDefault()
 
   const title = document.getElementById("notesTitle").value
   const subject = document.getElementById("notesSubject").value
   const semester = document.getElementById("notesSemester").value
   const description = document.getElementById("notesDescription").value
+  const file = document.getElementById("notesFile").files[0]
 
-  const token = localStorage.getItem("token")
-  if (!token) {
-    alert("Please login first")
+  if (!file) {
+    alert("Please select a file to upload.")
     return
   }
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/notes`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        title,
-        subject,
-        semester,
-        description,
-        fileName: `${title}.pdf`,
-        fileUrl: "#", // Placeholder for file URL
-        fileSize: 0,
-      }),
-    })
+  const notes = JSON.parse(localStorage.getItem("notes"))
 
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to upload notes")
-    }
-
-    alert("Notes uploaded successfully! Waiting for admin approval.")
-    closeModal("uploadNotesModal")
-    document.getElementById("uploadNotesForm").reset()
-    updateUserStats()
-    loadNotes()
-  } catch (error) {
-    alert(error.message)
+  const newNote = {
+    id: Date.now(),
+    title,
+    subject,
+    semester,
+    description,
+    userId: currentUser.id,
+    userName: currentUser.name,
+    status: "pending",
+    dateUploaded: new Date().toISOString(),
+    fileName: file.name,
+    fileSize: file.size,
+    fileUrl: URL.createObjectURL(file),
   }
+
+  notes.push(newNote)
+  localStorage.setItem("notes", JSON.stringify(notes))
+
+  // Add notification for admin
+  addNotification(`New notes uploaded: ${title}`, "notes", newNote.id)
+
+  alert("Notes uploaded successfully! Waiting for admin approval.")
+  closeModal("uploadNotesModal")
+  document.getElementById("uploadNotesForm").reset()
+  updateUserStats()
+  loadNotes()
 }
 
-async function loadNotes() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/notes`)
-    const notes = await response.json()
+function loadNotes() {
+  const notes = JSON.parse(localStorage.getItem("notes"))
+  const approvedNotes = notes.filter((note) => note.status === "approved")
 
-    const container = document.getElementById("notesList")
-    if (!container) return
+  const container = document.getElementById("notesList")
+  container.innerHTML = ""
 
-    container.innerHTML = ""
-
-    if (notes.length === 0) {
-      container.innerHTML = '<p class="text-center">No notes available.</p>'
-      return
-    }
-
-    notes.forEach((note) => {
-      const noteCard = createItemCard(note, "notes")
-      container.appendChild(noteCard)
-    })
-  } catch (error) {
-    console.error("Error loading notes:", error)
+  if (approvedNotes.length === 0) {
+    container.innerHTML = '<p class="text-center">No notes available.</p>'
+    return
   }
+
+  approvedNotes.forEach((note) => {
+    const noteCard = createItemCard(note, "notes")
+    container.appendChild(noteCard)
+  })
 }
 
 function filterNotes() {
   const semester = document.getElementById("semesterFilter").value
   const subject = document.getElementById("subjectFilter").value.toLowerCase()
-  // Implementation for filter functionality
-  loadNotes() // For now, just reload all notes
+
+  const notes = JSON.parse(localStorage.getItem("notes"))
+  let filteredNotes = notes.filter((note) => note.status === "approved")
+
+  if (semester) {
+    filteredNotes = filteredNotes.filter((note) => note.semester === semester)
+  }
+
+  if (subject) {
+    filteredNotes = filteredNotes.filter(
+      (note) => note.subject.toLowerCase().includes(subject) || note.title.toLowerCase().includes(subject),
+    )
+  }
+
+  const container = document.getElementById("notesList")
+  container.innerHTML = ""
+
+  if (filteredNotes.length === 0) {
+    container.innerHTML = '<p class="text-center">No notes found matching your criteria.</p>'
+    return
+  }
+
+  filteredNotes.forEach((note) => {
+    const noteCard = createItemCard(note, "notes")
+    container.appendChild(noteCard)
+  })
 }
 
 // Admin Dashboard functions
@@ -1535,268 +1665,259 @@ function loadAdminDashboard() {
   loadRecentNotifications()
 }
 
-async function updateAdminStats() {
-  try {
-    const token = localStorage.getItem("token")
-    if (!token) return
+function updateAdminStats() {
+  const users = JSON.parse(localStorage.getItem("users"))
+  const lostItems = JSON.parse(localStorage.getItem("lostItems"))
+  const notes = JSON.parse(localStorage.getItem("notes"))
 
-    // Fetch all users
-    const usersResponse = await fetch(`${API_BASE_URL}/user/all`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    const users = await usersResponse.json()
+  const pendingItems = lostItems.filter((item) => item.status === "pending").length
+  const pendingNotes = notes.filter((note) => note.status === "pending").length
+  const approvedItems =
+    lostItems.filter((item) => item.status === "approved").length +
+    notes.filter((note) => note.status === "approved").length
 
-    // Fetch pending lost items
-    const pendingLostResponse = await fetch(`${API_BASE_URL}/lostfound/pending`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    const pendingLostItems = await pendingLostResponse.json()
+  document.getElementById("totalUsers").textContent = users.length
+  document.getElementById("pendingApprovals").textContent = pendingItems + pendingNotes
+  document.getElementById("approvedItems").textContent = approvedItems
 
-    // Fetch pending notes
-    const pendingNotesResponse = await fetch(`${API_BASE_URL}/notes/pending`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    const pendingNotes = await pendingNotesResponse.json()
+  // Update pending count badge
+  const pendingCount = pendingItems + pendingNotes
+  document.getElementById("pendingCount").textContent = pendingCount
 
-    // Update stats
-    const totalUsersEl = document.getElementById("totalUsers")
-    const pendingApprovalsEl = document.getElementById("pendingApprovals")
-    const pendingCountEl = document.getElementById("pendingCount")
-
-    if (totalUsersEl) totalUsersEl.textContent = users.length || 0
-
-    const totalPending = (pendingLostItems.length || 0) + (pendingNotes.length || 0)
-    if (pendingApprovalsEl) pendingApprovalsEl.textContent = totalPending
-    if (pendingCountEl) {
-      pendingCountEl.textContent = totalPending
-      pendingCountEl.style.display = totalPending > 0 ? "block" : "none"
-    }
-  } catch (error) {
-    console.error("Error updating admin stats:", error)
+  if (pendingCount > 0) {
+    document.getElementById("pendingCount").style.display = "block"
+  } else {
+    document.getElementById("pendingCount").style.display = "none"
   }
 }
 
-async function loadUsersManagement() {
-  try {
-    const token = localStorage.getItem("token")
-    if (!token) return
+function loadUsersManagement() {
+  const users = JSON.parse(localStorage.getItem("users"))
+  const tbody = document.getElementById("usersTableBody")
+  tbody.innerHTML = ""
 
-    const response = await fetch(`${API_BASE_URL}/user/all`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    const users = await response.json()
-
-    const tbody = document.getElementById("usersTableBody")
-    if (!tbody) return
-
-    tbody.innerHTML = ""
-
-    users.forEach((user) => {
-      const row = document.createElement("tr")
-      row.innerHTML = `
-        <td>${user.name}</td>
-        <td>${user.email}</td>
-        <td>${user.phone}</td>
-        <td>${new Date(user.createdAt || user.joinDate).toLocaleDateString()}</td>
-        <td>
-          <button class="btn btn-danger btn-sm" onclick="deleteUser('${user._id}')">Delete</button>
-        </td>
-      `
-      tbody.appendChild(row)
-    })
-  } catch (error) {
-    console.error("Error loading users:", error)
-  }
+  users.forEach((user) => {
+    const row = document.createElement("tr")
+    row.innerHTML = `
+            <td>${user.name}</td>
+            <td>${user.email}</td>
+            <td>${user.phone}</td>
+            <td>${new Date(user.joinDate).toLocaleDateString()}</td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">Delete</button>
+            </td>
+        `
+    tbody.appendChild(row)
+  })
 }
 
-async function deleteUser(userId) {
+function deleteUser(userId) {
   if (confirm("Are you sure you want to delete this user?")) {
-    try {
-      const token = localStorage.getItem("token")
-      const response = await fetch(`${API_BASE_URL}/admin/user/${userId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+    const users = JSON.parse(localStorage.getItem("users"))
+    const user = users.find((u) => u.id === userId)
+    const updatedUsers = users.filter((user) => user.id !== userId)
+    localStorage.setItem("users", JSON.stringify(updatedUsers))
 
-      if (response.ok) {
-        alert("User deleted successfully")
-        loadUsersManagement()
-        updateAdminStats()
-      } else {
-        throw new Error("Failed to delete user")
-      }
-    } catch (error) {
-      alert(error.message)
-    }
+    addNotification(`User deleted: ${user.name}`, "user")
+    loadUsersManagement()
+    updateAdminStats()
   }
 }
 
-async function loadPendingApprovals() {
-  try {
-    const token = localStorage.getItem("token")
-    if (!token) return
+function loadPendingApprovals() {
+  const lostItems = JSON.parse(localStorage.getItem("lostItems"))
+  const notes = JSON.parse(localStorage.getItem("notes"))
 
-    // Load pending lost items
-    const lostResponse = await fetch(`${API_BASE_URL}/lostfound/pending`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  const pendingLostItems = lostItems.filter((item) => item.status === "pending")
+  const pendingNotes = notes.filter((note) => note.status === "pending")
+
+  // Update counts
+  document.getElementById("pendingLostCount").textContent = `${pendingLostItems.length} pending`
+  document.getElementById("pendingNotesCount").textContent = `${pendingNotes.length} pending`
+
+  // Load pending lost items
+  const lostItemsContainer = document.getElementById("pendingLostItems")
+  lostItemsContainer.innerHTML = ""
+
+  if (pendingLostItems.length === 0) {
+    lostItemsContainer.innerHTML = "<p>No pending lost items.</p>"
+  } else {
+    pendingLostItems.forEach((item) => {
+      const approvalCard = createApprovalCard(item, "lostItem")
+      lostItemsContainer.appendChild(approvalCard)
     })
-    const pendingLostItems = await lostResponse.json()
+  }
 
-    // Load pending notes
-    const notesResponse = await fetch(`${API_BASE_URL}/notes/pending`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  // Load pending notes
+  const notesContainer = document.getElementById("pendingNotes")
+  notesContainer.innerHTML = ""
+
+  if (pendingNotes.length === 0) {
+    notesContainer.innerHTML = "<p>No pending notes.</p>"
+  } else {
+    pendingNotes.forEach((note) => {
+      const approvalCard = createApprovalCard(note, "note")
+      notesContainer.appendChild(approvalCard)
     })
-    const pendingNotes = await notesResponse.json()
-
-    // Update counts
-    const pendingLostCountEl = document.getElementById("pendingLostCount")
-    const pendingNotesCountEl = document.getElementById("pendingNotesCount")
-
-    if (pendingLostCountEl) pendingLostCountEl.textContent = `${pendingLostItems.length} pending`
-    if (pendingNotesCountEl) pendingNotesCountEl.textContent = `${pendingNotes.length} pending`
-
-    // Load pending lost items
-    const lostItemsContainer = document.getElementById("pendingLostItems")
-    if (lostItemsContainer) {
-      lostItemsContainer.innerHTML = ""
-
-      if (pendingLostItems.length === 0) {
-        lostItemsContainer.innerHTML = "<p>No pending lost items.</p>"
-      } else {
-        pendingLostItems.forEach((item) => {
-          const approvalCard = createApprovalCard(item, "lostItem")
-          lostItemsContainer.appendChild(approvalCard)
-        })
-      }
-    }
-
-    // Load pending notes
-    const notesContainer = document.getElementById("pendingNotes")
-    if (notesContainer) {
-      notesContainer.innerHTML = ""
-
-      if (pendingNotes.length === 0) {
-        notesContainer.innerHTML = "<p>No pending notes.</p>"
-      } else {
-        pendingNotes.forEach((note) => {
-          const approvalCard = createApprovalCard(note, "note")
-          notesContainer.appendChild(approvalCard)
-        })
-      }
-    }
-  } catch (error) {
-    console.error("Error loading pending approvals:", error)
   }
 }
 
 function loadContentManagement() {
-  // Implementation for content management
-  console.log("Loading content management...")
-}
+  const lostItems = JSON.parse(localStorage.getItem("lostItems"))
+  const notes = JSON.parse(localStorage.getItem("notes"))
 
-// Approval functions
-async function approveItem(itemId, type) {
-  try {
-    const token = localStorage.getItem("token")
-    let endpoint = ""
+  // Load all lost items
+  const lostItemsContainer = document.getElementById("allLostItems")
+  lostItemsContainer.innerHTML = ""
 
-    if (type === "lostItem") {
-      endpoint = `/admin/approve/lostitem/${itemId}`
-    } else if (type === "note") {
-      endpoint = `/admin/approve/note/${itemId}`
-    }
-
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  if (lostItems.length === 0) {
+    lostItemsContainer.innerHTML = "<p>No lost items.</p>"
+  } else {
+    lostItems.forEach((item) => {
+      const contentCard = createContentCard(item, "lostItem")
+      lostItemsContainer.appendChild(contentCard)
     })
+  }
 
-    if (response.ok) {
-      alert("Item approved successfully!")
-      loadPendingApprovals()
-      updateAdminStats()
-      updateNotificationBadge()
-    } else {
-      throw new Error("Failed to approve item")
-    }
-  } catch (error) {
-    alert(error.message)
+  // Load all notes
+  const notesContainer = document.getElementById("allNotes")
+  notesContainer.innerHTML = ""
+
+  if (notes.length === 0) {
+    notesContainer.innerHTML = "<p>No notes.</p>"
+  } else {
+    notes.forEach((note) => {
+      const contentCard = createContentCard(note, "note")
+      notesContainer.appendChild(contentCard)
+    })
   }
 }
 
-async function rejectItem(itemId, type) {
-  try {
-    const token = localStorage.getItem("token")
-    let endpoint = ""
+// Approval functions
+function approveItem(itemId, type) {
+  if (type === "lostItem") {
+    const lostItems = JSON.parse(localStorage.getItem("lostItems"))
+    const item = lostItems.find((item) => item.id === itemId)
+    if (item) {
+      item.status = "approved"
+      localStorage.setItem("lostItems", JSON.stringify(lostItems))
+      addNotification(`Lost item approved: ${item.title}`, "approval")
+    }
+  } else if (type === "note") {
+    const notes = JSON.parse(localStorage.getItem("notes"))
+    const note = notes.find((note) => note.id === itemId)
+    if (note) {
+      note.status = "approved"
+      localStorage.setItem("notes", JSON.stringify(notes))
+      addNotification(`Notes approved: ${note.title}`, "approval")
+    }
+  }
 
+  loadPendingApprovals()
+  updateAdminStats()
+  updateNotificationBadge()
+  alert("Item approved successfully!")
+}
+
+function rejectItem(itemId, type) {
+  if (type === "lostItem") {
+    const lostItems = JSON.parse(localStorage.getItem("lostItems"))
+    const item = lostItems.find((item) => item.id === itemId)
+    if (item) {
+      item.status = "rejected"
+      localStorage.setItem("lostItems", JSON.stringify(lostItems))
+      addNotification(`Lost item rejected: ${item.title}`, "approval")
+    }
+  } else if (type === "note") {
+    const notes = JSON.parse(localStorage.getItem("notes"))
+    const note = notes.find((note) => note.id === itemId)
+    if (note) {
+      note.status = "rejected"
+      localStorage.setItem("notes", JSON.stringify(notes))
+      addNotification(`Notes rejected: ${note.title}`, "approval")
+    }
+  }
+
+  loadPendingApprovals()
+  updateAdminStats()
+  updateNotificationBadge()
+  alert("Item rejected successfully!")
+}
+
+function deleteItem(itemId, type) {
+  if (confirm("Are you sure you want to delete this item?")) {
     if (type === "lostItem") {
-      endpoint = `/admin/reject/lostitem/${itemId}`
+      const lostItems = JSON.parse(localStorage.getItem("lostItems"))
+      const item = lostItems.find((item) => item.id === itemId)
+      const updatedItems = lostItems.filter((item) => item.id !== itemId)
+      localStorage.setItem("lostItems", JSON.stringify(updatedItems))
+      addNotification(`Lost item deleted: ${item.title}`, "system")
     } else if (type === "note") {
-      endpoint = `/admin/reject/note/${itemId}`
+      const notes = JSON.parse(localStorage.getItem("notes"))
+      const note = notes.find((note) => note.id === itemId)
+      const updatedNotes = notes.filter((note) => note.id !== itemId)
+      localStorage.setItem("notes", JSON.stringify(updatedNotes))
+      addNotification(`Notes deleted: ${note.title}`, "system")
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-
-    if (response.ok) {
-      alert("Item rejected successfully!")
-      loadPendingApprovals()
-      updateAdminStats()
-      updateNotificationBadge()
-    } else {
-      throw new Error("Failed to reject item")
-    }
-  } catch (error) {
-    alert(error.message)
+    loadContentManagement()
+    updateAdminStats()
+    alert("Item deleted successfully!")
   }
 }
 
 // Notification functions
-async function updateNotificationBadge() {
+function addNotification(message, type, itemId = null) {
+  // Only create notifications if user is logged in
   if (!currentUser) return
 
-  try {
-    const token = localStorage.getItem("token")
-    const response = await fetch(`${API_BASE_URL}/notifications/unread`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  // Create notification via API
+  fetch("/api/notifications", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify({
+      message,
+      type,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Notification created:", data)
+      updateNotificationBadge()
     })
-    const notifications = await response.json()
+    .catch((error) => {
+      console.error("Error creating notification:", error)
+    })
+}
 
-    const unreadCount = notifications.length
+function updateNotificationBadge() {
+  if (!currentUser) return
 
-    const notificationDot = document.getElementById("adminNotificationDot")
-    if (notificationDot) {
-      if (unreadCount > 0) {
-        notificationDot.style.display = "block"
-      } else {
-        notificationDot.style.display = "none"
+  // Fetch unread notifications count from API
+  fetch("/api/notifications/unread", {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      const unreadCount = data.length
+
+      const notificationDot = document.getElementById("adminNotificationDot")
+      if (notificationDot) {
+        if (unreadCount > 0) {
+          notificationDot.style.display = "block"
+        } else {
+          notificationDot.style.display = "none"
+        }
       }
-    }
-  } catch (error) {
-    console.error("Error fetching notifications:", error)
-  }
+    })
+    .catch((error) => {
+      console.error("Error fetching notifications:", error)
+    })
 }
 
 function showNotifications() {
@@ -1805,16 +1926,13 @@ function showNotifications() {
   const modal = document.getElementById("notificationModal")
   const list = document.getElementById("notificationList")
 
-  if (!modal || !list) return
-
   list.innerHTML = "<p class='text-center'>Loading notifications...</p>"
   modal.style.display = "block"
 
   // Fetch notifications from API
-  const token = localStorage.getItem("token")
-  fetch(`${API_BASE_URL}/notifications`, {
+  fetch("/api/notifications", {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
   })
     .then((response) => response.json())
@@ -1874,75 +1992,68 @@ function showNotifications() {
     })
 }
 
-async function markNotificationAsRead(notificationId) {
-  try {
-    const token = localStorage.getItem("token")
-    const response = await fetch(`${API_BASE_URL}/notifications/${notificationId}/read`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-
-    if (response.ok) {
-      console.log("Marked notification as read")
+function markNotificationAsRead(notificationId) {
+  fetch(`/api/notifications/${notificationId}/read`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Marked notification as read:", data)
       updateNotificationBadge()
       showNotifications() // Refresh the notifications list
-    }
-  } catch (error) {
-    console.error("Error marking notification as read:", error)
-  }
+    })
+    .catch((error) => {
+      console.error("Error marking notification as read:", error)
+    })
 }
 
-async function markAllNotificationsAsRead() {
-  try {
-    const token = localStorage.getItem("token")
-    const response = await fetch(`${API_BASE_URL}/notifications/read-all`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-
-    if (response.ok) {
-      console.log("Marked all notifications as read")
+function markAllNotificationsAsRead() {
+  fetch("/api/notifications/read-all", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Marked all notifications as read:", data)
       updateNotificationBadge()
       showNotifications() // Refresh the notifications list
-    }
-  } catch (error) {
-    console.error("Error marking notifications as read:", error)
-  }
+    })
+    .catch((error) => {
+      console.error("Error marking notifications as read:", error)
+    })
 }
 
-async function loadRecentNotifications() {
+function loadRecentNotifications() {
   if (!currentUser) return
 
   const container = document.getElementById("recentNotifications")
-  if (!container) return
-
   container.innerHTML = "<p class='text-center'>Loading...</p>"
 
-  try {
-    const token = localStorage.getItem("token")
-    const response = await fetch(`${API_BASE_URL}/notifications`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    const notifications = await response.json()
+  // Fetch notifications from API
+  fetch("/api/notifications", {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  })
+    .then((response) => response.json())
+    .then((notifications) => {
+      container.innerHTML = ""
 
-    container.innerHTML = ""
+      if (notifications.length === 0) {
+        container.innerHTML = "<p class='text-center'>No recent activity</p>"
+        return
+      }
 
-    if (notifications.length === 0) {
-      container.innerHTML = "<p class='text-center'>No recent activity</p>"
-      return
-    }
-
-    // Display only the 5 most recent notifications
-    notifications.slice(0, 5).forEach((notification) => {
-      const item = document.createElement("div")
-      item.className = `activity-item ${!notification.read ? "unread" : ""}`
-      item.innerHTML = `
+      // Display only the 5 most recent notifications
+      notifications.slice(0, 5).forEach((notification) => {
+        const item = document.createElement("div")
+        item.className = `activity-item ${!notification.read ? "unread" : ""}`
+        item.innerHTML = `
                 <div class="activity-icon">
                     <i class="fas fa-${getNotificationIcon(notification.type)}"></i>
                 </div>
@@ -1951,12 +2062,13 @@ async function loadRecentNotifications() {
                     <div class="activity-time">${formatTimeAgo(new Date(notification.createdAt))}</div>
                 </div>
             `
-      container.appendChild(item)
+        container.appendChild(item)
+      })
     })
-  } catch (error) {
-    console.error("Error fetching recent notifications:", error)
-    container.innerHTML = "<p class='text-center text-danger'>Error loading notifications</p>"
-  }
+    .catch((error) => {
+      console.error("Error fetching recent notifications:", error)
+      container.innerHTML = "<p class='text-center text-danger'>Error loading notifications</p>"
+    })
 }
 
 function getNotificationIcon(type) {
@@ -2009,7 +2121,7 @@ function createItemCard(item, type) {
                     <span>📅 ${new Date(item.datePosted).toLocaleDateString()}</span>
                 </div>
                 <div class="item-actions">
-                    <button class="btn btn-primary btn-sm" onclick="contactUser('${item.user?.phone || "N/A"}', '${item.user?.name || "Unknown"}')">
+                    <button class="btn btn-primary btn-sm" onclick="contactUser('${item.userContact}', '${item.userName}')">
                         <i class="fas fa-phone"></i> Contact
                     </button>
                 </div>
@@ -2025,11 +2137,11 @@ function createItemCard(item, type) {
                 <div class="item-description">${item.description}</div>
                 <div class="item-price">₹${item.price}</div>
                 <div class="item-meta">
-                    <span>👤 ${item.user?.name || "Unknown"}</span>
+                    <span>👤 ${item.userName}</span>
                     <span>📅 ${new Date(item.datePosted).toLocaleDateString()}</span>
                 </div>
                 <div class="item-actions">
-                    <button class="btn btn-primary btn-sm" onclick="contactUser('${item.contact}', '${item.user?.name || "Unknown"}')">
+                    <button class="btn btn-primary btn-sm" onclick="contactUser('${item.contact}', '${item.userName}')">
                         <i class="fas fa-phone"></i> Contact Seller
                     </button>
                 </div>
@@ -2046,7 +2158,7 @@ function createItemCard(item, type) {
                 <div class="item-meta">
                     <span>📚 ${item.subject}</span>
                     <span>🎓 Semester ${item.semester}</span>
-                    <span>👤 ${item.user?.name || "Unknown"}</span>
+                    <span>👤 ${item.userName}</span>
                     <span>📅 ${new Date(item.dateUploaded).toLocaleDateString()}</span>
                 </div>
                 <div class="item-actions">
@@ -2075,14 +2187,14 @@ function createApprovalCard(item, type) {
                     <h4>${item.title}</h4>
                     <p><strong>Description:</strong> ${item.description}</p>
                     <p><strong>Location:</strong> ${item.location}</p>
-                    <p><strong>Posted by:</strong> ${item.user?.name || "Unknown"}</p>
+                    <p><strong>Posted by:</strong> ${item.userName}</p>
                     <p><strong>Date:</strong> ${new Date(item.datePosted).toLocaleDateString()}</p>
                 </div>
                 <div class="approval-actions">
-                    <button class="btn btn-success btn-sm" onclick="approveItem('${item._id}', 'lostItem')">
+                    <button class="btn btn-success btn-sm" onclick="approveItem(${item.id}, 'lostItem')">
                         <i class="fas fa-check"></i> Approve
                     </button>
-                    <button class="btn btn-danger btn-sm" onclick="rejectItem('${item._id}', 'lostItem')">
+                    <button class="btn btn-danger btn-sm" onclick="rejectItem(${item.id}, 'lostItem')">
                         <i class="fas fa-times"></i> Reject
                     </button>
                 </div>
@@ -2096,16 +2208,73 @@ function createApprovalCard(item, type) {
                     <p><strong>Subject:</strong> ${item.subject}</p>
                     <p><strong>Semester:</strong> ${item.semester}</p>
                     <p><strong>Description:</strong> ${item.description || "No description"}</p>
-                    <p><strong>Uploaded by:</strong> ${item.user?.name || "Unknown"}</p>
+                    <p><strong>Uploaded by:</strong> ${item.userName}</p>
                     <p><strong>Date:</strong> ${new Date(item.dateUploaded).toLocaleDateString()}</p>
                     <p><strong>File:</strong> ${item.fileName}</p>
                 </div>
                 <div class="approval-actions">
-                    <button class="btn btn-success btn-sm" onclick="approveItem('${item._id}', 'note')">
+                    <button class="btn btn-success btn-sm" onclick="approveItem(${item.id}, 'note')">
                         <i class="fas fa-check"></i> Approve
                     </button>
-                    <button class="btn btn-danger btn-sm" onclick="rejectItem('${item._id}', 'note')">
+                    <button class="btn btn-danger btn-sm" onclick="rejectItem(${item.id}, 'note')">
                         <i class="fas fa-times"></i> Reject
+                    </button>
+                </div>
+            </div>
+        `
+  }
+
+  card.innerHTML = cardContent
+  return card
+}
+
+function createContentCard(item, type) {
+  const card = document.createElement("div")
+  card.className = "approval-item"
+
+  let statusBadge = ""
+  if (item.status === "pending") {
+    statusBadge = '<span class="status-badge status-pending">Pending</span>'
+  } else if (item.status === "approved") {
+    statusBadge = '<span class="status-badge status-approved">Approved</span>'
+  } else if (item.status === "rejected") {
+    statusBadge = '<span class="status-badge status-rejected">Rejected</span>'
+  }
+
+  let cardContent = ""
+
+  if (type === "lostItem") {
+    cardContent = `
+            <div class="approval-header">
+                <div class="approval-info">
+                    <h4>${item.title} ${statusBadge}</h4>
+                    <p><strong>Description:</strong> ${item.description}</p>
+                    <p><strong>Location:</strong> ${item.location}</p>
+                    <p><strong>Posted by:</strong> ${item.userName}</p>
+                    <p><strong>Date:</strong> ${new Date(item.datePosted).toLocaleDateString()}</p>
+                </div>
+                <div class="approval-actions">
+                    <button class="btn btn-danger btn-sm" onclick="deleteItem(${item.id}, 'lostItem')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        `
+  } else if (type === "note") {
+    cardContent = `
+            <div class="approval-header">
+                <div class="approval-info">
+                    <h4>${item.title} ${statusBadge}</h4>
+                    <p><strong>Subject:</strong> ${item.subject}</p>
+                    <p><strong>Semester:</strong> ${item.semester}</p>
+                    <p><strong>Description:</strong> ${item.description || "No description"}</p>
+                    <p><strong>Uploaded by:</strong> ${item.userName}</p>
+                    <p><strong>Date:</strong> ${new Date(item.dateUploaded).toLocaleDateString()}</p>
+                    <p><strong>File:</strong> ${item.fileName}</p>
+                </div>
+                <div class="approval-actions">
+                    <button class="btn btn-danger btn-sm" onclick="deleteItem(${item.id}, 'note')">
+                        <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
             </div>
@@ -2128,6 +2297,107 @@ function downloadFile(fileUrl, fileName) {
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
+}
+
+// Initialize sample data
+function initializeSampleData() {
+  // Add sample lost items
+  const lostItems = JSON.parse(localStorage.getItem("lostItems"))
+  if (lostItems.length === 0) {
+    const sampleLostItems = [
+      {
+        id: 1,
+        title: "Blue Backpack",
+        description: "Navy blue backpack with laptop compartment. Contains important documents.",
+        location: "Library - 2nd Floor",
+        userId: 1,
+        userName: "John Doe",
+        userContact: "1234567890",
+        status: "approved",
+        datePosted: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+        image: null,
+      },
+      {
+        id: 2,
+        title: "iPhone 12",
+        description: "Black iPhone 12 with cracked screen protector. Has a blue case.",
+        location: "Cafeteria",
+        userId: 2,
+        userName: "Jane Smith",
+        userContact: "0987654321",
+        status: "approved",
+        datePosted: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+        image: null,
+      },
+    ]
+    localStorage.setItem("lostItems", JSON.stringify(sampleLostItems))
+  }
+
+  // Add sample marketplace items
+  const marketplaceItems = JSON.parse(localStorage.getItem("marketplaceItems"))
+  if (marketplaceItems.length === 0) {
+    const sampleMarketplaceItems = [
+      {
+        id: 1,
+        title: "Physics Textbook",
+        description: "University Physics 14th Edition. Good condition, minimal highlighting.",
+        price: 2500,
+        contact: "john@example.com",
+        userId: 1,
+        userName: "John Doe",
+        datePosted: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
+        image: null,
+      },
+      {
+        id: 2,
+        title: "Scientific Calculator",
+        description: "Casio FX-991ES Plus. Perfect working condition.",
+        price: 800,
+        contact: "jane@example.com",
+        userId: 2,
+        userName: "Jane Smith",
+        datePosted: new Date(Date.now() - 345600000).toISOString(), // 4 days ago
+        image: null,
+      },
+    ]
+    localStorage.setItem("marketplaceItems", JSON.stringify(sampleMarketplaceItems))
+  }
+
+  // Add sample notes
+  const notes = JSON.parse(localStorage.getItem("notes"))
+  if (notes.length === 0) {
+    const sampleNotes = [
+      {
+        id: 1,
+        title: "Data Structures Complete Notes",
+        subject: "Computer Science",
+        semester: "3",
+        description: "Comprehensive notes covering all topics including arrays, linked lists, trees, and graphs.",
+        userId: 1,
+        userName: "John Doe",
+        status: "approved",
+        dateUploaded: new Date(Date.now() - 432000000).toISOString(), // 5 days ago
+        fileName: "data-structures-notes.pdf",
+        fileSize: 2048000,
+        fileUrl: "#",
+      },
+      {
+        id: 2,
+        title: "Calculus Formula Sheet",
+        subject: "Mathematics",
+        semester: "1",
+        description: "Quick reference sheet for all important calculus formulas.",
+        userId: 2,
+        userName: "Jane Smith",
+        status: "approved",
+        dateUploaded: new Date(Date.now() - 518400000).toISOString(), // 6 days ago
+        fileName: "calculus-formulas.pdf",
+        fileSize: 512000,
+        fileUrl: "#",
+      },
+    ]
+    localStorage.setItem("notes", JSON.stringify(sampleNotes))
+  }
 }
 
 // Smooth scrolling for navigation links
@@ -2160,3 +2430,17 @@ function removeLoadingState(button, originalText) {
   button.classList.remove("loading")
   button.removeAttribute("data-original-html")
 }
+
+// Add click handlers for buttons that need loading states
+document.addEventListener("click", (e) => {
+  if (e.target.matches(".btn-primary[type='submit']") && !e.target.classList.contains("loading")) {
+  }
+
+  // Handle sidebar toggle
+  if (e.target.matches(".sidebar-toggle") || e.target.closest(".sidebar-toggle")) {
+    const sidebar = document.querySelector(".dashboard-sidebar")
+    if (sidebar) {
+      sidebar.classList.toggle("active")
+    }
+  }
+})
