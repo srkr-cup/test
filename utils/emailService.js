@@ -6,7 +6,7 @@ const createTransporter = () => {
     console.log("⚠️ Email credentials not configured")
     return null
   }
-  
+
   return nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -24,13 +24,19 @@ const generateOTP = () => {
 // Send OTP email
 const sendOTPEmail = async (email, otp) => {
   try {
-    // If email credentials are not configured, return demo mode
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    // If email credentials are not configured or are set to default values, return demo mode
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || process.env.EMAIL_PASS === 'your_app_password_here') {
       console.log(`📧 Demo Mode - OTP for ${email}: ${otp}`)
       return { success: true, demo: true, otp }
     }
 
     const transporter = createTransporter()
+
+    // Additional check for transporter
+    if (!transporter) {
+      console.log(`📧 Demo Mode - OTP for ${email}: ${otp}`)
+      return { success: true, demo: true, otp }
+    }
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -74,13 +80,19 @@ const sendOTPEmail = async (email, otp) => {
 // Send password reset email
 const sendPasswordResetEmail = async (email, otp) => {
   try {
-    // If email credentials are not configured, return demo mode
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    // If email credentials are not configured or are set to default values, return demo mode
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || process.env.EMAIL_PASS === 'your_app_password_here') {
       console.log(`📧 Demo Mode - Password Reset OTP for ${email}: ${otp}`)
       return { success: true, demo: true, otp }
     }
 
     const transporter = createTransporter()
+
+    // Additional check for transporter
+    if (!transporter) {
+      console.log(`📧 Demo Mode - Password Reset OTP for ${email}: ${otp}`)
+      return { success: true, demo: true, otp }
+    }
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
