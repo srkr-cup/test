@@ -69,110 +69,20 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeOTPInputs()
   setupMobileMenu()
   setupDashboardSidebar()
-  
-  if (hamburger && navMenu) {
-    hamburger.addEventListener('click', () => {
-      hamburger.classList.toggle('active')
-      navMenu.classList.toggle('active')
-    })
-    
-    // Close mobile menu when clicking on a nav link
-    document.querySelectorAll('.nav-link').forEach(link => {
-      link.addEventListener('click', () => {
-        hamburger.classList.remove('active')
-        navMenu.classList.remove('active')
-      })
-    })
-  }
 })
+
 
 function initializeApp() {
   console.log("Initializing app...")
 
-  // Setup mobile menu functionality
-function setupMobileMenu() {
-  const hamburger = document.getElementById('hamburger')
-  const navMenu = document.getElementById('nav-menu')
-  const navLinks = document.querySelectorAll('.nav-link')
+// Sample users are now stored in MongoDB database
+  // No need to initialize them in localStorage
 
-  if (hamburger && navMenu) {
-    hamburger.addEventListener('click', () => {
-      hamburger.classList.toggle('active')
-      navMenu.classList.toggle('active')
-    })
+  // Admin user is now stored in MongoDB database with role='admin'
+  // No need to initialize admin in localStorage
 
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!hamburger.contains(e.target) && !navMenu.contains(e.target)) {
-        hamburger.classList.remove('active')
-        navMenu.classList.remove('active')
-      }
-    })
-
-    // Close menu when clicking nav links
-    navLinks.forEach(link => {
-      link.addEventListener('click', () => {
-        hamburger.classList.remove('active')
-        navMenu.classList.remove('active')
-      })
-    })
-  }
-}
-
-// Initialize sample users if not exists
-  if (!localStorage.getItem("users")) {
-    console.log("Creating sample users...")
-    const sampleUsers = [
-      {
-        id: 1,
-        name: "John Doe",
-        regdNo: "22B91A24",
-        email: "john@example.com",
-        phone: "1234567890",
-        password: "password123",
-        joinDate: new Date().toISOString(),
-      },
-      {
-        id: 2,
-        name: "Jane Smith",
-        regdNo: "24B91A2S2",
-        email: "jane@example.com",
-        phone: "0987654321",
-        password: "password123",
-        joinDate: new Date().toISOString(),
-      },
-    ]
-    localStorage.setItem("users", JSON.stringify(sampleUsers))
-    console.log("Sample users created:", sampleUsers)
-  }
-
-  // Initialize admin user
-  if (!localStorage.getItem("admin")) {
-    console.log("Creating admin user...")
-    const admin = {
-      email: "srkrcup@gmail.com",
-      password: "Srkrcup@25",
-    }
-    localStorage.setItem("admin", JSON.stringify(admin))
-    console.log("Admin user created:", admin)
-  }
-
-  // Initialize empty arrays for data
-  if (!localStorage.getItem("lostItems")) {
-    localStorage.setItem("lostItems", JSON.stringify([]))
-  }
-  if (!localStorage.getItem("marketplaceItems")) {
-    localStorage.setItem("marketplaceItems", JSON.stringify([]))
-  }
-  if (!localStorage.getItem("notes")) {
-    localStorage.setItem("notes", JSON.stringify([]))
-  }
-  if (!localStorage.getItem("notifications")) {
-    localStorage.setItem("notifications", JSON.stringify([]))
-  }
-
-  // Initialize sample data
-  initializeSampleData()
+  // All data is now stored in MongoDB database
+  // No need to initialize empty arrays in localStorage
 
   // Check if user is logged in
   const savedUser = localStorage.getItem("currentUser")
@@ -396,83 +306,78 @@ async function handleLogin(e) {
   loginButton.querySelector("span").textContent = "Signing In..."
 
   try {
-    if (adminLogin) {
-      // Admin login - use localStorage for demo purposes
-      const admin = JSON.parse(localStorage.getItem("admin"))
-      console.log("Admin credentials:", admin)
-      if (email == "srkrcup@gmail.com" && password == "Srkrcup@25") {
-        isAdmin = true
-        currentUser = { name: "Admin", email: admin.email }
-        localStorage.setItem("currentUser", JSON.stringify(currentUser))
-        localStorage.setItem("isAdmin", "true")
-        console.log("Admin login successful, showing dashboard")
-        try {
-          // Store admin notification locally
-          const notifications = JSON.parse(localStorage.getItem("notifications") || "[]")
-          notifications.push({
-            id: Date.now(),
-            message: "Admin logged in",
-            type: "system",
-            timestamp: new Date().toISOString(),
-            read: false,
-          })
-          localStorage.setItem("notifications", JSON.stringify(notifications))
+    // Use API for all logins (both admin and regular users)
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        isAdmin: adminLogin
+      }),
+    })
+    
+    let data;
+    try {
+      data = await response.json()
+    } catch (jsonError) {
+      console.error("JSON parsing error:", jsonError)
+      throw new Error("Server response was not valid JSON. Please try again.")
+    }
 
-          showDashboard()
-          closeModal("loginModal")
-          updateNotificationBadge()
-        } catch (error) {
-          console.error("Error showing dashboard:", error)
-          alert("Error loading dashboard. Please try again.")
-        }
+    if (!response.ok) {
+      if (data.message === "Email not verified") {
+        alert("Your email is not verified. Please check your inbox for the verification OTP.")
+        // Show OTP verification modal with the email
+        showOTPVerificationModal(email)
       } else {
-        alert("Invalid admin credentials. Please contact system administrator.")
+        throw new Error(data.message || "Login failed")
       }
-    } else {
-      // User login - use API
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      })
+      return
+    }
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        if (data.message === "Email not verified") {
-          alert("Your email is not verified. Please check your inbox for the verification OTP.")
-          // Show OTP verification modal with the email
-          showOTPVerificationModal(email)
-        } else {
-          throw new Error(data.message || "Login failed")
-        }
-        return
-      }
-
-      // Login successful
-      isAdmin = data.user.role === "admin"
-      currentUser = data.user
+    // Login successful
+    if (!data.token || !data.user) {
+      throw new Error("Invalid server response: missing token or user data")
+    }
+    
+    isAdmin = data.user.role === "admin"
+    currentUser = data.user
+    
+    // Store user data and token in localStorage
+    try {
       localStorage.setItem("currentUser", JSON.stringify(currentUser))
       localStorage.setItem("isAdmin", isAdmin ? "true" : "false")
       localStorage.setItem("token", data.token)
+    } catch (storageError) {
+      console.error("Error storing auth data:", storageError)
+      // Continue anyway as the session will work for this page load
+    }
 
-      console.log("User login successful, showing dashboard")
-      try {
-        showDashboard()
-        closeModal("loginModal")
-        addNotification(`${currentUser.name} logged in`, "system")
-      } catch (error) {
-        console.error("Error showing dashboard:", error)
-        alert("Error loading dashboard. Please try again.")
-      }
+    console.log("User login successful, showing dashboard")
+    try {
+      showDashboard()
+      closeModal("loginModal")
+      addNotification(`${currentUser.name} logged in`, "system")
+    } catch (error) {
+      console.error("Error showing dashboard:", error)
+      alert("Error loading dashboard. Please try again.")
     }
   } catch (error) {
-    alert(error.message || "Login failed. Please try again.")
+    console.error("Login error:", error)
+    
+    // Display a more user-friendly error message
+    let errorMessage = "Login failed. Please try again."
+    
+    if (error.message.includes("JSON")) {
+      errorMessage = "There was a problem connecting to the server. Please try again later."
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
+    alert(errorMessage)
   } finally {
     // Remove loading state
     loginButton.disabled = false
@@ -534,10 +439,15 @@ async function handleSignup(e) {
     }
 
     // Show success message
-    alert("Account created successfully! Please check your email for the verification code.")
+    if (data.otp) {
+      // Demo mode - show OTP to user
+      alert(`Account created successfully! DEMO MODE: Your verification code is: ${data.otp}`)
+    } else {
+      alert("Account created successfully! Please check your email for the verification code.")
+    }
 
     // Show OTP verification modal
-    showOTPVerificationModal(email)
+    showOTPVerificationModal(email, data.otp)
     closeModal("signupModal")
   } catch (error) {
     alert(error.message)
@@ -595,7 +505,7 @@ function setupOTPVerificationListeners() {
 }
 
 // OTP Verification Functions
-function showOTPVerificationModal(email) {
+function showOTPVerificationModal(email, demoOtp = null) {
   // Create modal if it doesn't exist
   let otpModal = document.getElementById("otpVerificationModal")
   if (!otpModal) {
@@ -608,6 +518,7 @@ function showOTPVerificationModal(email) {
                 <div class="modal-header">
                     <h2 class="pulse-animation">Verify Your Email</h2>
                     <p>We've sent a verification code to your email</p>
+                    ${demoOtp ? `<div class="demo-otp-container"><p class="demo-otp-notice">DEMO MODE</p><p class="demo-otp-code">Your verification code: <strong>${demoOtp}</strong></p></div>` : ''}
                     <button class="modal-close" onclick="closeModal('otpVerificationModal')">
                         <i class="fas fa-times"></i>
                     </button>
@@ -775,6 +686,13 @@ function startOTPCountdownTimer() {
   resendLink.style.pointerEvents = "none"
   resendLink.style.opacity = "0.5"
   inputs.forEach(input => input.disabled = false)
+  
+  // Enable resend link after 30 seconds
+  setTimeout(() => {
+    resendLink.classList.add("active")
+    resendLink.style.pointerEvents = "auto"
+    resendLink.style.opacity = "1"
+  }, 30000) // 30 seconds
   
   // Reset timer classes and state
   timerElement.classList.remove("timer-warning", "timer-critical", "timer-expired", "pulse-animation")
@@ -1048,6 +966,32 @@ async function handleResendOTP(e) {
     successMessage.className = "verification-success"
     successMessage.innerHTML = '<i class="fas fa-check-circle"></i> New code sent successfully!'
     form.appendChild(successMessage)
+    
+    // If in demo mode, display the OTP
+    if (data.otp) {
+      // Update or create the demo OTP display
+      let demoContainer = document.querySelector('.demo-otp-container')
+      if (demoContainer) {
+        // Update existing container
+        const otpCodeElement = demoContainer.querySelector('.demo-otp-code')
+        if (otpCodeElement) {
+          otpCodeElement.innerHTML = `Your verification code: <strong>${data.otp}</strong>`
+        }
+      } else {
+        // Create new demo OTP container
+        const modalHeader = document.querySelector('#otpVerificationModal .modal-header')
+        demoContainer = document.createElement('div')
+        demoContainer.className = 'demo-otp-container'
+        demoContainer.innerHTML = `
+          <p class="demo-otp-notice">DEMO MODE</p>
+          <p class="demo-otp-code">Your verification code: <strong>${data.otp}</strong></p>
+        `
+        modalHeader.appendChild(demoContainer)
+      }
+      
+      // Alert the user about demo mode
+      alert(`DEMO MODE: Your new verification code is: ${data.otp}`)
+    }
 
     // Clear and focus first input
     document.querySelectorAll('.otp-input').forEach((input, index) => {
@@ -2300,103 +2244,36 @@ function downloadFile(fileUrl, fileName) {
 }
 
 // Initialize sample data
-function initializeSampleData() {
-  // Add sample lost items
-  const lostItems = JSON.parse(localStorage.getItem("lostItems"))
-  if (lostItems.length === 0) {
-    const sampleLostItems = [
-      {
-        id: 1,
-        title: "Blue Backpack",
-        description: "Navy blue backpack with laptop compartment. Contains important documents.",
-        location: "Library - 2nd Floor",
-        userId: 1,
-        userName: "John Doe",
-        userContact: "1234567890",
-        status: "approved",
-        datePosted: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-        image: null,
-      },
-      {
-        id: 2,
-        title: "iPhone 12",
-        description: "Black iPhone 12 with cracked screen protector. Has a blue case.",
-        location: "Cafeteria",
-        userId: 2,
-        userName: "Jane Smith",
-        userContact: "0987654321",
-        status: "approved",
-        datePosted: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-        image: null,
-      },
-    ]
-    localStorage.setItem("lostItems", JSON.stringify(sampleLostItems))
-  }
+// Sample data is now stored in MongoDB database
+// No need for initializeSampleData function
 
-  // Add sample marketplace items
-  const marketplaceItems = JSON.parse(localStorage.getItem("marketplaceItems"))
-  if (marketplaceItems.length === 0) {
-    const sampleMarketplaceItems = [
-      {
-        id: 1,
-        title: "Physics Textbook",
-        description: "University Physics 14th Edition. Good condition, minimal highlighting.",
-        price: 2500,
-        contact: "john@example.com",
-        userId: 1,
-        userName: "John Doe",
-        datePosted: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
-        image: null,
-      },
-      {
-        id: 2,
-        title: "Scientific Calculator",
-        description: "Casio FX-991ES Plus. Perfect working condition.",
-        price: 800,
-        contact: "jane@example.com",
-        userId: 2,
-        userName: "Jane Smith",
-        datePosted: new Date(Date.now() - 345600000).toISOString(), // 4 days ago
-        image: null,
-      },
-    ]
-    localStorage.setItem("marketplaceItems", JSON.stringify(sampleMarketplaceItems))
-  }
+// Setup mobile menu functionality
+function setupMobileMenu() {
+  const hamburger = document.getElementById('hamburger')
+  const navMenu = document.getElementById('nav-menu')
+  const navLinks = document.querySelectorAll('.nav-link')
 
-  // Add sample notes
-  const notes = JSON.parse(localStorage.getItem("notes"))
-  if (notes.length === 0) {
-    const sampleNotes = [
-      {
-        id: 1,
-        title: "Data Structures Complete Notes",
-        subject: "Computer Science",
-        semester: "3",
-        description: "Comprehensive notes covering all topics including arrays, linked lists, trees, and graphs.",
-        userId: 1,
-        userName: "John Doe",
-        status: "approved",
-        dateUploaded: new Date(Date.now() - 432000000).toISOString(), // 5 days ago
-        fileName: "data-structures-notes.pdf",
-        fileSize: 2048000,
-        fileUrl: "#",
-      },
-      {
-        id: 2,
-        title: "Calculus Formula Sheet",
-        subject: "Mathematics",
-        semester: "1",
-        description: "Quick reference sheet for all important calculus formulas.",
-        userId: 2,
-        userName: "Jane Smith",
-        status: "approved",
-        dateUploaded: new Date(Date.now() - 518400000).toISOString(), // 6 days ago
-        fileName: "calculus-formulas.pdf",
-        fileSize: 512000,
-        fileUrl: "#",
-      },
-    ]
-    localStorage.setItem("notes", JSON.stringify(sampleNotes))
+  if (hamburger && navMenu) {
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active')
+      navMenu.classList.toggle('active')
+    })
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!hamburger.contains(e.target) && !navMenu.contains(e.target)) {
+        hamburger.classList.remove('active')
+        navMenu.classList.remove('active')
+      }
+    })
+
+    // Close menu when clicking nav links
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active')
+        navMenu.classList.remove('active')
+      })
+    })
   }
 }
 
